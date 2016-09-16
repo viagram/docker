@@ -1,7 +1,8 @@
 #!/bin/bash
 
 : ${SSH_USERNAME:=user}
-: ${SSH_USERPASS:=$(dd if=/dev/urandom bs=1 count=15 | base64)}
+: ${SSH_USERPASS:=$(cat /proc/sys/kernel/random/uuid | sha256sum | base64 | head -c 15;echo)}
+#: ${SSH_USERPASS:=$(dd if=/dev/urandom bs=1 count=15 | base64)}
 
 __create_rundir() {
 	mkdir -p /var/run/sshd
