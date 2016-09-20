@@ -1,1 +1,0 @@
-lighttpd ALL=NOPASSWD: systemctl restart lighttpd,systemctl stop lighttpd,systemctl start lighttpd,systemctl reload lighttpd

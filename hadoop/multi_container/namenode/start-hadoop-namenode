@@ -1,7 +1,0 @@
-#!/bin/sh
-
-# Format the namenode if it is needed
-/usr/sbin/hdfs-create-dirs
-
-# Start the namenode
-supervisord -n
