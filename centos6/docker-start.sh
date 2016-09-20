@@ -14,7 +14,7 @@ __create_hostkeys() {
         if [ -f /etc/ssh/ssh_host_rsa_key ]; then
             rm -f /etc/ssh/ssh_host_rsa_key
         fi
-        if [ -f /etc/ssh/ssh_host_dsa_key]; then
+        if [ -f /etc/ssh/ssh_host_dsa_key ]; then
             rm -f /etc/ssh/ssh_host_dsa_key
         fi
         ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
