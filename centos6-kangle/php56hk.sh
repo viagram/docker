@@ -3,7 +3,7 @@
 yum -y install bzip2-devel libxml2-devel curl-devel db4-devel libjpeg-devel libpng-devel freetype-devel pcre-devel zlib-devel sqlite-devel libmcrypt-devel 
 yum -y install mhash-devel openssl-devel unzip
 yum -y install libtool-ltdl libtool-ltdl-devel
-PREFIX="/vhs/kangle/ext/php55"
+PREFIX="/vhs/kangle/ext/php56"
 ZEND_ARCH="i386"
 LIB="lib"
 if test `arch` = "x86_64"; then
@@ -11,9 +11,11 @@ if test `arch` = "x86_64"; then
         ZEND_ARCH="x86_64"
 fi
 
-wget -c http://hk1.php.net/get/php-5.5.28.tar.gz/from/this/mirror -O php-5.5.28.tar.gz
-tar zxvf php-5.5.28.tar.gz
-cd php-5.5.28
+[  -z $1 ] && DOWNLOAD_PHP_URL="http://d.zuzb.com/web" || DOWNLOAD_PHP_URL=$1
+
+wget -c http://hk2.php.net/get/php-5.6.12.tar.bz2/from/this/mirror  -O php-5.6.12.tar.bz2
+tar xjf php-5.6.12.tar.bz2
+cd php-5.6.12
 CONFIG_CMD="./configure --prefix=$PREFIX --with-config-file-scan-dir=$PREFIX/etc/php.d --with-libdir=$LIB --enable-fastcgi --with-mysql --with-mysqli --with-pdo-mysql --with-iconv-dir --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr/include/libxml2/libxml --enable-xml --disable-fileinfo --enable-magic-quotes --enable-safe-mode --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization --with-curl --with-curlwrappers --enable-mbregex --enable-mbstring --enable-ftp --with-gd --enable-gd-native-ttf --with-openssl --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-pear --with-gettext --enable-calendar --with-openssl"
 if [ -f /usr/include/mcrypt.h ]; then
         CONFIG_CMD="$CONFIG_CMD --with-mcrypt"
@@ -32,14 +34,16 @@ mkdir -p $PREFIX/etc/php.d
 if [ ! -f $PREFIX/php-templete.ini ]; then
         cp php.ini-dist $PREFIX/php-templete.ini
 fi
+if [ ! -f $PREFIX/config.xml ]; then
+        wget $DOWNLOAD_PHP_URL/php56/config.xml -O $PREFIX/config.xml
+fi
 cd ..
-\mv /kangle_install/php55/config.xml $PREFIX/config.xml
-\mv /kangle_install/php55/php-templete.ini $PREFIX/php-templete.ini
+wget $DOWNLOAD_PHP_URL/php56/php-templete.ini -O $PREFIX/php-templete.ini
 #install ioncube
-wget -c https://raw.githubusercontent.com/1265578519/kangle/master/php/5.5/5527/ioncube-$ZEND_ARCH-5.5.zip
-unzip ioncube-$ZEND_ARCH-5.5.zip
+wget -c https://raw.githubusercontent.com/1265578519/kangle/master/php/5.6/5611/ioncube-$ZEND_ARCH-5.6.zip
+unzip ioncube-$ZEND_ARCH-5.6.zip
 mkdir -p $PREFIX/ioncube
-\mv ioncube_loader_lin_5.5.so $PREFIX/ioncube/ioncube_loader_lin_5.5.so
+\mv ioncube_loader_lin_5.6.so $PREFIX/ioncube/ioncube_loader_lin_5.6.so
 wget http://pecl.php.net/get/memcache-3.0.8.tgz
 tar zxf memcache-3.0.8.tgz
 cd memcache-3.0.8
@@ -47,12 +51,14 @@ $PREFIX/bin/phpize
 ./configure --with-php-config=$PREFIX/bin/php-config
 make
 make install
-# wget http://pecl.php.net/get/apcu-4.0.7.tgz
-# tar zxf apcu-4.0.7.tgz
-# cd apcu-4.0.7
-# $PREFIX/bin/phpize
-# ./configure --with-php-config=$PREFIX/bin/php-config
-# make
-# make install
+cd ..
+wget http://pecl.php.net/get/apcu-4.0.7.tgz
+tar zxf apcu-4.0.7.tgz
+cd apcu-4.0.7
+$PREFIX/bin/phpize
+./configure --with-php-config=$PREFIX/bin/php-config
+make
+make install
+rm -rf /tmp/*
 /vhs/kangle/bin/kangle -r
 cd ..

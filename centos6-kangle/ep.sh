@@ -5,6 +5,7 @@ EASYPANEL_VERSION="2.6.17"
 PUREFTP_VERSION="1.0.36"
 PREFIX="/vhs/kangle"
 CONFIG_FILES="/ext/tpl_php52/php-templete.ini"
+[  -z $1 ] && DOWNLOAD_BASE_URL="http://d.zuzb.com/web" || DOWNLOAD_BASE_URL=$1
 
 restore_config()
 {
@@ -96,6 +97,14 @@ function setup_kangle
             		fi
     		fi
 	fi
+	KANGLE_URL="$DOWNLOAD_BASE_URL/kangle-$KANGLE_VERSION.tar.gz"
+	if [  -f kangle-$KANGLE_VERSION.tar.gz ] ; then
+		rm -f kangle-$KANGLE_VERSION.tar.gz
+	fi	
+	wget $KANGLE_URL 
+	if [ $? != 0 ] ; then
+		exit $?
+	fi
 	tar xzf kangle-$KANGLE_VERSION.tar.gz
 	cd kangle-$KANGLE_VERSION
 	find|xargs touch
@@ -139,8 +148,36 @@ function stat_iptables
 	/sbin/iptables -I INPUT -p tcp --dport 80 -j ACCEPT
 	/sbin/iptables -I INPUT -p tcp --dport 81 -j ACCEPT
 	/sbin/iptables -I INPUT -p tcp --dport 82 -j ACCEPT
-	/sbin/iptables -I INPUT -p tcp --dport 22 -j ACCEPT
+	/sbin/iptables -I INPUT -p tcp --dport 83 -j ACCEPT
+	/sbin/iptables -I INPUT -p tcp --dport 252 -j ACCEPT
 	/etc/rc.d/init.d/iptables save
+}
+#setup mysql
+function setup_mysql
+{
+	if [ -d /var/lib/mysql/ ] ; then
+		return;
+	fi
+        yum -y install mysql-server
+        if [ $? != 0 ] ; then
+                exit $?
+        fi
+        /etc/init.d/mysqld start
+#	cat <<mayday
+#       =========================================
+#       please enter you  mysql root passwd:
+#        =========================================
+#mayday
+
+#        echo -n "mysql root passwd:"
+#        read mysql_passwd
+#        /usr/bin/mysqladmin -u root password $mysql_passwd
+#        if [ $? != 0 ] ; then
+#                exit $?
+#        else
+#                echo "mysql-server is install success"
+#        fi
+	chkconfig mysqld on
 }
 #setup php
 function setup_php
@@ -181,8 +218,16 @@ function setup_easypanel
                 chmod 777 /var/lib/php/session
                 chmod a+t /var/lib/php/session
         fi
-	chmod 700 $PREFIX/etc $PREFIX/var $PREFIX/nodewww/data
+	chmod 700 $PREFIX/etc $PREFIX/var $PREFIX/nodewww/data	
+	rm -rf easypanel-$EASYPANEL_VERSION-$SYS
+	rm -rf easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz
+	EASYPANEL_URL="$DOWNLOAD_BASE_URL/easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz"
 	EA_FILE_NAME="easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz"
+	wget $EASYPANEL_URL -O $EA_FILE_NAME -c
+	if [ $? != 0 ] ; then
+        	exit $?
+	fi
+	
 	tar xzf $EA_FILE_NAME
 	if [ $? != 0 ] ; then
         	exit $?
@@ -221,6 +266,54 @@ function setup_easypanel
 
 	echo "easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION setup success.............................................................................."
 }
+#setup pure-ftpd
+function setup_pureftpd
+{
+	if [ -f /vhs/pureftpd/sbin/pure-ftpd ] ; then
+		return;
+	fi
+	if [ ! -f /vhs/kangle/bin/pureftp_auth ] ; then
+		echo "/vhs/kangle/pureftp_auth not found"
+		exit;
+	fi	
+	del_proftpd
+	DOWN_URL="$DOWNLOAD_BASE_URL/easypanel/source/pure-ftpd-$PUREFTP_VERSION.tar.gz"
+	WGET_NEW_NAME="pure-ftpd-$PUREFTP_VERSION.tar.gz"
+	wget $DOWN_URL -O $WGET_NEW_NAME -c
+	if [ $? != 0 ] ; then 
+		wget $K_DOWN_URL -o $WGET_NEW_NAME
+		if [ $? != 0 ] ; then
+			echo $? "wget pureftp failed,please manuanl setup pureftp"
+			exit
+		fi
+	fi
+	tar xzf $WGET_NEW_NAME
+	cd pure-ftpd-$PUREFTP_VERSION
+	./configure --prefix=/vhs/pure-ftpd with --with-extauth --with-throttling --with-peruserlimits
+	make
+	if [ $? != 0 ] ; then 
+		exit $?
+	fi
+	make install
+	cd -
+	\cp /vhs/kangle/bin/pureftpd /etc/init.d/pureftpd
+	if [ ! -f /etc/rc.d/rc3.d/S96pureftpd ] ; then
+                ln -s /etc/init.d/pureftpd /etc/rc.d/rc3.d/S96pureftpd
+                ln -s /etc/init.d/pureftpd /etc/rc.d/rc5.d/S96pureftpd
+        fi
+	/etc/init.d/pureftpd start
+}
+
+function del_proftpd
+{
+	#rm -f /etc/init.d/proftpd
+	#rm -f /etc/rc.d/rc3.d/S96proftpd
+	#rm -f /etc/rc.d/rc5.d/S96proftpd
+	chkconfig proftpd off
+	killall proftpd
+	
+}
+
 function setup_webalizer
 {
 	if [ ! -f /usr/bin/webalizer ] ; then
@@ -237,15 +330,18 @@ function write_partner
 }
 function setup_php54
 {
-	sh php54hk.sh
+	wget $DOWNLOAD_BASE_URL/php54hk.sh -O php54hk.sh -c
+	sh php54hk.sh $DOWNLOAD_BASE_URL
 }
 function setup_php55
 {
-	sh php55hk.sh
+	wget $DOWNLOAD_BASE_URL/php55hk.sh -O php55hk.sh -c
+	sh php55hk.sh $DOWNLOAD_BASE_URL
 }
 function setup_php56
 {
-	sh php56hk.sh
+	wget $DOWNLOAD_BASE_URL/php56hk.sh -O php56hk.sh -c
+	sh php56hk.sh $DOWNLOAD_BASE_URL
 }
 if test $SYSVERSION = '5' ; then
 	#remove php 5.1
@@ -259,6 +355,8 @@ echo "ent="$ent;
 echo $PHPNAME
 service httpd stop
 service nginx stop
+mkdir tmp
+cd tmp
 setup_system
 #if [ -f /etc/init.d/httpd ] ;then
 #	yum -y remove httpd*
@@ -270,8 +368,11 @@ if [ "$ent" == "" ] ; then
 fi
 #setup_easypanel $1 is php53.ini
 setup_easypanel php53
+#setup_proftpd
+#setup_pureftpd
 setup_webalizer
 stat_iptables
+setup_mysql
 restore_config
 write_partner
 setup_php54
@@ -285,6 +386,8 @@ fi
 [ ! -e '/usr/bin/curl' ] && yum -y install curl
 public_IP=`curl ip.zuzb.com/?format=ip`
 wget  http://localhost:82/upgrade.php -O /dev/null -q
+echo -e "set MySQL passwd: \033[32m/usr/bin/mysqladmin -u root password [passwd]\033[0m."
 echo -e "Please visit \033[32mhttp://${public_IP}:82/admin/\033[0m to continue."
-rm -rf /kangle_install
+cd ..
+rm -rf tmp
 rm -rf $0

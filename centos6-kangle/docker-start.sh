@@ -25,8 +25,8 @@ __create_hostkeys() {
 
 __create_user() {
     if [ ! -f /.user_pw_set ]; then
-        useradd $SSH_USERNAME
-        echo -e "$SSH_USERPASS" | (passwd --stdin $SSH_USERNAME)
+        useradd $SSH_USERNAME 2>/dev/null
+        echo -e "$SSH_USERPASS" | (passwd --stdin $SSH_USERNAME) 2>/dev/null
         touch /.user_pw_set
         echo "========================================================================"
         echo "You can now connect to this CentOS container via SSH using:"
@@ -40,9 +40,9 @@ __create_user() {
 
 __start_kangle() {
     if [ -f /vhs/kangle/bin/kangle ]; then
-        [ -n "`grep exit /etc/rc.local`" ] && sed -i "s/exit/#exit_the_place/g" /etc/rc.local
-        [ -z "`grep \"/vhs/kangle/bin/kangle\" /etc/rc.local`" ] && echo "/vhs/kangle/bin/kangle" >>/etc/rc.local
-        [ -n "`grep #exit_the_place /etc/rc.local`" ] && sed -i "s/#exit_the_place/exit/g" /etc/rc.local
+        [ -n "`grep exit /etc/rc.local`" ] && sed -i "s/exit/#exit_the_place/g" /etc/rc.local 2>/dev/null
+        [ -z "`grep \"/vhs/kangle/bin/kangle\" /etc/rc.local`" ] && echo "/vhs/kangle/bin/kangle" >>/etc/rc.local 2>/dev/null
+        [ -n "`grep #exit_the_place /etc/rc.local`" ] && sed -i "s/#exit_the_place/exit/g" /etc/rc.local 2>/dev/null
         /vhs/kangle/bin/kangle
     fi
 }

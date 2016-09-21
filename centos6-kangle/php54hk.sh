@@ -11,6 +11,8 @@ if test `arch` = "x86_64"; then
         ZEND_ARCH="x86_64"
 fi
 
+[  -z $1 ] && DOWNLOAD_PHP_URL="http://d.zuzb.com/web" || DOWNLOAD_PHP_URL=$1
+
 wget -c http://hk2.php.net/get/php-5.4.44.tar.bz2/from/this/mirror -O php-5.4.44.tar.bz2
 tar xjf php-5.4.44.tar.bz2
 cd php-5.4.44
@@ -33,9 +35,11 @@ if [ ! -f $PREFIX/php-templete.ini ]; then
         cp php.ini-dist $PREFIX/php-templete.ini
 		
 fi
+if [ ! -f $PREFIX/config.xml ]; then
+        wget $DOWNLOAD_PHP_URL/php5444/config.xml -O $PREFIX/config.xml
+fi
 cd ..
-\mv /kangle_install/php5444/config.xml $PREFIX/config.xml
-\mv /kangle_install/php5444/php-templete.ini $PREFIX/php-templete.ini
+wget $DOWNLOAD_PHP_URL/php5444/php-templete.ini -O $PREFIX/php-templete.ini
 #install zend
 wget -c http://iweb.dl.sourceforge.net/project/kanglewebserver/php/5.4/5443/ZendGuardLoader-70429-PHP-5.4-linux-glibc23-$ZEND_ARCH.tar.gz
 tar zxf ZendGuardLoader-70429-PHP-5.4-linux-glibc23-$ZEND_ARCH.tar.gz
@@ -48,6 +52,7 @@ wget -c http://iweb.dl.sourceforge.net/project/kanglewebserver/php/5.4/5443/ionc
 unzip ioncube-$ZEND_ARCH-5.4.zip
 mkdir -p $PREFIX/ioncube
 \mv ioncube_loader_lin_5.4.so $PREFIX/ioncube/ioncube_loader_lin_5.4.so
+rm -rf /tmp/*
 /vhs/kangle/bin/kangle -r
 cd ..
 cd ..
