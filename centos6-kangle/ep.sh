@@ -92,7 +92,7 @@ function setup_kangle
             		fi
     		fi
 	fi
-	KANGLE_URL="$DOWNLOAD_BASE_URL/src/kangle-$KANGLE_VERSION.tar.gz"
+	KANGLE_URL="$DOWNLOAD_BASE_URL/kangle-$KANGLE_VERSION.tar.gz"
 	if [  -f kangle-$KANGLE_VERSION.tar.gz ] ; then
 		rm -f kangle-$KANGLE_VERSION.tar.gz
 	fi	
@@ -187,7 +187,7 @@ function setup_easypanel
 	chmod 700 $PREFIX/etc $PREFIX/var $PREFIX/nodewww/data	
 	rm -rf easypanel-$EASYPANEL_VERSION-$SYS
 	rm -rf easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz
-	EASYPANEL_URL="$DOWNLOAD_BASE_URL/easypanel/easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz"
+	EASYPANEL_URL="$DOWNLOAD_BASE_URL/easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz"
 	EA_FILE_NAME="easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz"
 	wget --no-check-certificate $EASYPANEL_URL -O $EA_FILE_NAME -c
 	if [ $? != 0 ] ; then
@@ -243,7 +243,7 @@ function setup_pureftpd
 		exit;
 	fi	
 	del_proftpd
-	DOWN_URL="$DOWNLOAD_BASE_URL/easypanel/source/pure-ftpd-$PUREFTP_VERSION.tar.gz"
+	DOWN_URL="$DOWNLOAD_BASE_URL/pure-ftpd-$PUREFTP_VERSION.tar.gz"
 	WGET_NEW_NAME="pure-ftpd-$PUREFTP_VERSION.tar.gz"
 	wget --no-check-certificate $DOWN_URL -O $WGET_NEW_NAME -c
 	if [ $? != 0 ] ; then 
