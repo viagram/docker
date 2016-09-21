@@ -1,4 +1,4 @@
-#/bin/bash
+#/bin/sh
 KANGLE_VERSION="3.5.8"
 PHP_VERSION="5.2.17"
 EASYPANEL_VERSION="2.6.18"
@@ -92,7 +92,7 @@ function setup_kangle
             		fi
     		fi
 	fi
-	KANGLE_URL="$DOWNLOAD_BASE_URL/kangle-$KANGLE_VERSION.tar.gz"
+	KANGLE_URL="$DOWNLOAD_BASE_URL/src/kangle-$KANGLE_VERSION.tar.gz"
 	if [  -f kangle-$KANGLE_VERSION.tar.gz ] ; then
 		rm -f kangle-$KANGLE_VERSION.tar.gz
 	fi	
@@ -103,7 +103,7 @@ function setup_kangle
 	tar xzf kangle-$KANGLE_VERSION.tar.gz
 	cd kangle-$KANGLE_VERSION
 	find|xargs touch
-	./configure --prefix=/vhs/kangle --enable-vh-limit --enable-disk-cache --enable-ipv6 --enable-ssl
+	./configure --prefix=/vhs/kangle --enable-vh-limit --enable-disk-cache --enable-ipv6 --enable-ssl --enable-http2
 	if [ $? != 0 ] ; then
                  exit $?
         fi
@@ -123,12 +123,10 @@ function setup_kangle
 #prepare for system
 function setup_system
 {
-    yum clean all && yum clean metadata && yum clean dbcache
 	yum -y install wget make gcc gcc-c++
 	yum -y install pcre-devel zlib-devel
 	yum -y install openssl-devel sqlite-devel
 	yum -y install quota
-	yum -y update
 }
 function stat_iptables
 {
@@ -158,9 +156,10 @@ function setup_php
 	        PHP_PACKAGE_NAME=$1
 	fi
 	yum -y remove php*
-	yum -y install $PHP_PACKAGE_NAME-cli $PHP_PACKAGE_NAME-mysql  $PHP_PACKAGE_NAME-gd $PHP_PACKAGE_NAME-xml $PHP_PACKAGE_NAME-ldap $PHP_PACKAGE_NAME-mbstring $PHP_PACKAGE_NAME-bcmath $PHP_PACKAGE_NAME-pdo
+        yum -y install $PHP_PACKAGE_NAME-cli $PHP_PACKAGE_NAME-mysql  $PHP_PACKAGE_NAME-gd $PHP_PACKAGE_NAME-xml $PHP_PACKAGE_NAME-ldap $PHP_PACKAGE_NAME-mbstring $PHP_PACKAGE_NAME-bcmath $PHP_PACKAGE_NAME-pdo
 	#\cp /etc/php.ini /etc/php.ini.bak
 }
+
 #setup easypanel
 function setup_easypanel
 {	
@@ -188,7 +187,7 @@ function setup_easypanel
 	chmod 700 $PREFIX/etc $PREFIX/var $PREFIX/nodewww/data	
 	rm -rf easypanel-$EASYPANEL_VERSION-$SYS
 	rm -rf easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz
-	EASYPANEL_URL="$DOWNLOAD_BASE_URL/easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz"
+	EASYPANEL_URL="$DOWNLOAD_BASE_URL/easypanel/easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz"
 	EA_FILE_NAME="easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz"
 	wget --no-check-certificate $EASYPANEL_URL -O $EA_FILE_NAME -c
 	if [ $? != 0 ] ; then
@@ -248,7 +247,7 @@ function setup_pureftpd
 	WGET_NEW_NAME="pure-ftpd-$PUREFTP_VERSION.tar.gz"
 	wget --no-check-certificate $DOWN_URL -O $WGET_NEW_NAME -c
 	if [ $? != 0 ] ; then 
-		wget --no-check-certificate $K_DOWN_URL -o $WGET_NEW_NAME -c
+		wget --no-check-certificate -c $K_DOWN_URL -o $WGET_NEW_NAME
 		if [ $? != 0 ] ; then
 			echo $? "wget pureftp failed,please manuanl setup pureftp"
 			exit
@@ -333,19 +332,17 @@ setup_php $PHPNAME
 if [ "$ent" == "" ] ; then
 	setup_kangle
 fi
-#setup_easypanel $1 is php53.ini
-setup_easypanel php53
-#setup_proftpd
-#setup_pureftpd
-setup_webalizer
-stat_iptables
-restore_config
-write_partner
+
 setup_php54
 setup_php55
 setup_php56
-/vhs/kangle/bin/kangle -q
-/vhs/kangle/bin/kangle
+setup_easypanel php53
+setup_pureftpd
+setup_webalizer
+stat_iptables
+setup_mysql
+restore_config
+write_partner
 if [ ! -f /etc/php.d/ioncube.ini ] ; then
 	\cp /vhs/kangle/bin/ioncube.ini /etc/php.d/ioncube.ini
 fi
@@ -355,4 +352,4 @@ wget --no-check-certificate http://localhost:82/upgrade.php -O /dev/null -q
 echo -e "Please visit \033[32mhttp://${public_IP}:82/admin/\033[0m to continue."
 cd ..
 rm -rf tmp
-rm -rf $0
+rm -f $0
