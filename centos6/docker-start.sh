@@ -19,15 +19,15 @@ __create_hostkeys() {
         fi
         ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
         ssh-keygen -t rsa -f /etc/ssh/ssh_host_dsa_key -N ''
-        touch /.ssh_key_set
+        touch /.ssh_key_set 2>/dev/null
     fi
 }
 
 __create_user() {
     if [ ! -f /.user_pw_set ]; then
-        useradd $SSH_USERNAME
-        echo -e "$SSH_USERPASS" | (passwd --stdin $SSH_USERNAME)
-        touch /.user_pw_set
+        useradd $SSH_USERNAME 2>/dev/null
+        echo -e "$SSH_USERPASS" | (passwd --stdin $SSH_USERNAME) 2>/dev/null
+        touch /.user_pw_set 2>/dev/null
         echo "========================================================================"
         echo "You can now connect to this CentOS container via SSH using:"
         echo ""
