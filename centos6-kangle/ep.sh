@@ -1,11 +1,11 @@
-#/bin/sh
-KANGLE_VERSION="3.4.8"
+#/bin/bash
+KANGLE_VERSION="3.5.8"
 PHP_VERSION="5.2.17"
-EASYPANEL_VERSION="2.6.17"
+EASYPANEL_VERSION="2.6.18"
 PUREFTP_VERSION="1.0.36"
 PREFIX="/vhs/kangle"
 CONFIG_FILES="/ext/tpl_php52/php-templete.ini"
-[  -z $1 ] && DOWNLOAD_BASE_URL="http://d.zuzb.com/web" || DOWNLOAD_BASE_URL=$1
+[  -z $1 ] && DOWNLOAD_BASE_URL="https://raw.githubusercontent.com/viagram/docker/master/centos6-kangle" || DOWNLOAD_BASE_URL=$1
 
 restore_config()
 {
@@ -46,11 +46,6 @@ if test `ldd --version|head -1|awk '{print $NF;}'` = "2.5" ; then
         SYSVERSION="5"
 fi
 
-#PHP_PACKAGE_NAME='php'
-#if test `lsb_release -sr|cut -b 1` = '5' ; then
-#        PHP_PACKAGE_NAME='php53'
-#fi
-#$2 local_ver $1 kangle_ver
 rrr=''
 function get_version
 {
@@ -101,7 +96,7 @@ function setup_kangle
 	if [  -f kangle-$KANGLE_VERSION.tar.gz ] ; then
 		rm -f kangle-$KANGLE_VERSION.tar.gz
 	fi	
-	wget $KANGLE_URL 
+	wget --no-check-certificate -c $KANGLE_URL -O kangle-$KANGLE_VERSION.tar.gz
 	if [ $? != 0 ] ; then
 		exit $?
 	fi
@@ -149,35 +144,8 @@ function stat_iptables
 	/sbin/iptables -I INPUT -p tcp --dport 81 -j ACCEPT
 	/sbin/iptables -I INPUT -p tcp --dport 82 -j ACCEPT
 	/sbin/iptables -I INPUT -p tcp --dport 83 -j ACCEPT
-	/sbin/iptables -I INPUT -p tcp --dport 252 -j ACCEPT
+	/sbin/iptables -I INPUT -p tcp --dport 22 -j ACCEPT
 	/etc/rc.d/init.d/iptables save
-}
-#setup mysql
-function setup_mysql
-{
-	if [ -d /var/lib/mysql/ ] ; then
-		return;
-	fi
-        yum -y install mysql-server
-        if [ $? != 0 ] ; then
-                exit $?
-        fi
-        /etc/init.d/mysqld start
-#	cat <<mayday
-#       =========================================
-#       please enter you  mysql root passwd:
-#        =========================================
-#mayday
-
-#        echo -n "mysql root passwd:"
-#        read mysql_passwd
-#        /usr/bin/mysqladmin -u root password $mysql_passwd
-#        if [ $? != 0 ] ; then
-#                exit $?
-#        else
-#                echo "mysql-server is install success"
-#        fi
-	chkconfig mysqld on
 }
 #setup php
 function setup_php
@@ -193,7 +161,6 @@ function setup_php
 	yum -y install $PHP_PACKAGE_NAME-cli $PHP_PACKAGE_NAME-mysql  $PHP_PACKAGE_NAME-gd $PHP_PACKAGE_NAME-xml $PHP_PACKAGE_NAME-ldap $PHP_PACKAGE_NAME-mbstring $PHP_PACKAGE_NAME-bcmath $PHP_PACKAGE_NAME-pdo
 	#\cp /etc/php.ini /etc/php.ini.bak
 }
-
 #setup easypanel
 function setup_easypanel
 {	
@@ -223,7 +190,7 @@ function setup_easypanel
 	rm -rf easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz
 	EASYPANEL_URL="$DOWNLOAD_BASE_URL/easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz"
 	EA_FILE_NAME="easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz"
-	wget $EASYPANEL_URL -O $EA_FILE_NAME -c
+	wget --no-check-certificate $EASYPANEL_URL -O $EA_FILE_NAME -c
 	if [ $? != 0 ] ; then
         	exit $?
 	fi
@@ -279,9 +246,9 @@ function setup_pureftpd
 	del_proftpd
 	DOWN_URL="$DOWNLOAD_BASE_URL/easypanel/source/pure-ftpd-$PUREFTP_VERSION.tar.gz"
 	WGET_NEW_NAME="pure-ftpd-$PUREFTP_VERSION.tar.gz"
-	wget $DOWN_URL -O $WGET_NEW_NAME -c
+	wget --no-check-certificate $DOWN_URL -O $WGET_NEW_NAME -c
 	if [ $? != 0 ] ; then 
-		wget $K_DOWN_URL -o $WGET_NEW_NAME
+		wget --no-check-certificate $K_DOWN_URL -o $WGET_NEW_NAME -c
 		if [ $? != 0 ] ; then
 			echo $? "wget pureftp failed,please manuanl setup pureftp"
 			exit
@@ -330,17 +297,17 @@ function write_partner
 }
 function setup_php54
 {
-	wget $DOWNLOAD_BASE_URL/php54hk.sh -O php54hk.sh -c
+	wget --no-check-certificate $DOWNLOAD_BASE_URL/php54hk.sh -O php54hk.sh -c
 	sh php54hk.sh $DOWNLOAD_BASE_URL
 }
 function setup_php55
 {
-	wget $DOWNLOAD_BASE_URL/php55hk.sh -O php55hk.sh -c
+	wget --no-check-certificate $DOWNLOAD_BASE_URL/php55hk.sh -O php55hk.sh -c
 	sh php55hk.sh $DOWNLOAD_BASE_URL
 }
 function setup_php56
 {
-	wget $DOWNLOAD_BASE_URL/php56hk.sh -O php56hk.sh -c
+	wget --no-check-certificate $DOWNLOAD_BASE_URL/php56hk.sh -O php56hk.sh -c
 	sh php56hk.sh $DOWNLOAD_BASE_URL
 }
 if test $SYSVERSION = '5' ; then
@@ -372,7 +339,6 @@ setup_easypanel php53
 #setup_pureftpd
 setup_webalizer
 stat_iptables
-setup_mysql
 restore_config
 write_partner
 setup_php54
@@ -385,8 +351,7 @@ if [ ! -f /etc/php.d/ioncube.ini ] ; then
 fi
 [ ! -e '/usr/bin/curl' ] && yum -y install curl
 public_IP=`curl ip.zuzb.com/?format=ip`
-wget  http://localhost:82/upgrade.php -O /dev/null -q
-echo -e "set MySQL passwd: \033[32m/usr/bin/mysqladmin -u root password [passwd]\033[0m."
+wget --no-check-certificate http://localhost:82/upgrade.php -O /dev/null -q
 echo -e "Please visit \033[32mhttp://${public_IP}:82/admin/\033[0m to continue."
 cd ..
 rm -rf tmp
