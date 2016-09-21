@@ -8,7 +8,6 @@ EXPOSE 82
 
 RUN yum -y update; yum clean all
 RUN yum -y install wget curl curl-devel zlib-devel build-essential openssl openssl-devel openssh-server openssh passwd; yum clean all
-RUN rm -f /.ssh_key_set;rm -f /.user_pw_set;rm -rf /home/user;userdel user
 RUN curl https://raw.githubusercontent.com/viagram/docker/master/centos6-kangle/ep.sh | sh
 
 COPY ./docker-start.sh /docker-start.sh
