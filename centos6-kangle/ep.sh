@@ -46,6 +46,11 @@ if test `ldd --version|head -1|awk '{print $NF;}'` = "2.5" ; then
         SYSVERSION="5"
 fi
 
+#PHP_PACKAGE_NAME='php'
+#if test `lsb_release -sr|cut -b 1` = '5' ; then
+#        PHP_PACKAGE_NAME='php53'
+#fi
+#$2 local_ver $1 kangle_ver
 rrr=''
 function get_version
 {
@@ -103,7 +108,7 @@ function setup_kangle
 	tar xzf kangle-$KANGLE_VERSION.tar.gz
 	cd kangle-$KANGLE_VERSION
 	find|xargs touch
-	./configure --prefix=/vhs/kangle --enable-vh-limit --enable-disk-cache --enable-ipv6 --enable-ssl --enable-http2
+	./configure --prefix=/vhs/kangle --enable-vh-limit --enable-disk-cache --enable-ipv6 --enable-ssl
 	if [ $? != 0 ] ; then
                  exit $?
         fi
@@ -123,10 +128,12 @@ function setup_kangle
 #prepare for system
 function setup_system
 {
+    yum clean all && yum clean metadata && yum clean dbcache
 	yum -y install wget make gcc gcc-c++
 	yum -y install pcre-devel zlib-devel
 	yum -y install openssl-devel sqlite-devel
 	yum -y install quota
+	yum -y update
 }
 function stat_iptables
 {
@@ -156,7 +163,7 @@ function setup_php
 	        PHP_PACKAGE_NAME=$1
 	fi
 	yum -y remove php*
-        yum -y install $PHP_PACKAGE_NAME-cli $PHP_PACKAGE_NAME-mysql  $PHP_PACKAGE_NAME-gd $PHP_PACKAGE_NAME-xml $PHP_PACKAGE_NAME-ldap $PHP_PACKAGE_NAME-mbstring $PHP_PACKAGE_NAME-bcmath $PHP_PACKAGE_NAME-pdo
+	yum -y install $PHP_PACKAGE_NAME-cli $PHP_PACKAGE_NAME-mysql  $PHP_PACKAGE_NAME-gd $PHP_PACKAGE_NAME-xml $PHP_PACKAGE_NAME-ldap $PHP_PACKAGE_NAME-mbstring $PHP_PACKAGE_NAME-bcmath $PHP_PACKAGE_NAME-pdo
 	#\cp /etc/php.ini /etc/php.ini.bak
 }
 
@@ -243,7 +250,7 @@ function setup_pureftpd
 		exit;
 	fi	
 	del_proftpd
-	DOWN_URL="$DOWNLOAD_BASE_URL/pure-ftpd-$PUREFTP_VERSION.tar.gz"
+	DOWN_URL="$DOWNLOAD_BASE_URL/easypanel/source/pure-ftpd-$PUREFTP_VERSION.tar.gz"
 	WGET_NEW_NAME="pure-ftpd-$PUREFTP_VERSION.tar.gz"
 	wget --no-check-certificate $DOWN_URL -O $WGET_NEW_NAME -c
 	if [ $? != 0 ] ; then 
@@ -324,9 +331,6 @@ service nginx stop
 mkdir tmp
 cd tmp
 setup_system
-#if [ -f /etc/init.d/httpd ] ;then
-#	yum -y remove httpd*
-#fi
 
 setup_php $PHPNAME
 if [ "$ent" == "" ] ; then
@@ -337,7 +341,7 @@ setup_php54
 setup_php55
 setup_php56
 setup_easypanel php53
-setup_pureftpd
+#setup_pureftpd
 setup_webalizer
 stat_iptables
 setup_mysql
