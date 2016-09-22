@@ -103,7 +103,7 @@ function setup_kangle
 	tar xzf kangle-$KANGLE_VERSION.tar.gz
 	cd kangle-$KANGLE_VERSION
 	find|xargs touch
-	./configure --prefix=/vhs/kangle --enable-vh-limit --enable-disk-cache --enable-ipv6 --enable-ssl --enable-http2
+	./configure --prefix=/vhs/kangle --enable-vh-limit --enable-disk-cache --enable-ipv6 --enable-ssl
 	if [ $? != 0 ] ; then
                  exit $?
         fi
@@ -123,10 +123,12 @@ function setup_kangle
 #prepare for system
 function setup_system
 {
+    yum clean all && yum clean metadata && yum clean dbcache
 	yum -y install wget make gcc gcc-c++
 	yum -y install pcre-devel zlib-devel
 	yum -y install openssl-devel sqlite-devel
 	yum -y install quota
+	yum -y update
 }
 function stat_iptables
 {
@@ -156,7 +158,7 @@ function setup_php
 	        PHP_PACKAGE_NAME=$1
 	fi
 	yum -y remove php*
-        yum -y install $PHP_PACKAGE_NAME-cli $PHP_PACKAGE_NAME-mysql  $PHP_PACKAGE_NAME-gd $PHP_PACKAGE_NAME-xml $PHP_PACKAGE_NAME-ldap $PHP_PACKAGE_NAME-mbstring $PHP_PACKAGE_NAME-bcmath $PHP_PACKAGE_NAME-pdo
+	yum -y install $PHP_PACKAGE_NAME-cli $PHP_PACKAGE_NAME-mysql  $PHP_PACKAGE_NAME-gd $PHP_PACKAGE_NAME-xml $PHP_PACKAGE_NAME-ldap $PHP_PACKAGE_NAME-mbstring $PHP_PACKAGE_NAME-bcmath $PHP_PACKAGE_NAME-pdo
 	#\cp /etc/php.ini /etc/php.ini.bak
 }
 
@@ -243,7 +245,7 @@ function setup_pureftpd
 		exit;
 	fi	
 	del_proftpd
-	DOWN_URL="$DOWNLOAD_BASE_URL/pure-ftpd-$PUREFTP_VERSION.tar.gz"
+	DOWN_URL="$DOWNLOAD_BASE_URL/easypanel/source/pure-ftpd-$PUREFTP_VERSION.tar.gz"
 	WGET_NEW_NAME="pure-ftpd-$PUREFTP_VERSION.tar.gz"
 	wget --no-check-certificate $DOWN_URL -O $WGET_NEW_NAME -c
 	if [ $? != 0 ] ; then 
@@ -334,11 +336,13 @@ setup_easypanel php53
 #setup_pureftpd
 setup_webalizer
 stat_iptables
+restore_config
+write_partner
 #setup_php54
 #setup_php55
 #setup_php56
-restore_config
-write_partner
+/vhs/kangle/bin/kangle -q
+/vhs/kangle/bin/kangle
 if [ ! -f /etc/php.d/ioncube.ini ] ; then
 	\cp /vhs/kangle/bin/ioncube.ini /etc/php.d/ioncube.ini
 fi
@@ -348,4 +352,4 @@ wget --no-check-certificate http://localhost:82/upgrade.php -O /dev/null -q
 echo -e "Please visit \033[32mhttp://${public_IP}:82/admin/\033[0m to continue."
 cd ..
 rm -rf tmp
-rm -f $0
+rm -rf $0
