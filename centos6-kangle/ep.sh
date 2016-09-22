@@ -46,11 +46,6 @@ if test `ldd --version|head -1|awk '{print $NF;}'` = "2.5" ; then
         SYSVERSION="5"
 fi
 
-#PHP_PACKAGE_NAME='php'
-#if test `lsb_release -sr|cut -b 1` = '5' ; then
-#        PHP_PACKAGE_NAME='php53'
-#fi
-#$2 local_ver $1 kangle_ver
 rrr=''
 function get_version
 {
@@ -97,18 +92,18 @@ function setup_kangle
             		fi
     		fi
 	fi
-	KANGLE_URL="$DOWNLOAD_BASE_URL/kangle-$KANGLE_VERSION.tar.gz"
+	KANGLE_URL="$DOWNLOAD_BASE_URL/src/kangle-$KANGLE_VERSION.tar.gz"
 	if [  -f kangle-$KANGLE_VERSION.tar.gz ] ; then
 		rm -f kangle-$KANGLE_VERSION.tar.gz
 	fi	
-	wget --no-check-certificate -c $KANGLE_URL -O kangle-$KANGLE_VERSION.tar.gz
+	wget --no-check-certificate $KANGLE_URL -O kangle-$KANGLE_VERSION.tar.gz -c
 	if [ $? != 0 ] ; then
 		exit $?
 	fi
 	tar xzf kangle-$KANGLE_VERSION.tar.gz
 	cd kangle-$KANGLE_VERSION
 	find|xargs touch
-	./configure --prefix=/vhs/kangle --enable-vh-limit --enable-disk-cache --enable-ipv6 --enable-ssl
+	./configure --prefix=/vhs/kangle --enable-vh-limit --enable-disk-cache --enable-ipv6 --enable-ssl --enable-http2
 	if [ $? != 0 ] ; then
                  exit $?
         fi
@@ -128,12 +123,10 @@ function setup_kangle
 #prepare for system
 function setup_system
 {
-    yum clean all && yum clean metadata && yum clean dbcache
 	yum -y install wget make gcc gcc-c++
 	yum -y install pcre-devel zlib-devel
 	yum -y install openssl-devel sqlite-devel
 	yum -y install quota
-	yum -y update
 }
 function stat_iptables
 {
@@ -163,7 +156,7 @@ function setup_php
 	        PHP_PACKAGE_NAME=$1
 	fi
 	yum -y remove php*
-	yum -y install $PHP_PACKAGE_NAME-cli $PHP_PACKAGE_NAME-mysql  $PHP_PACKAGE_NAME-gd $PHP_PACKAGE_NAME-xml $PHP_PACKAGE_NAME-ldap $PHP_PACKAGE_NAME-mbstring $PHP_PACKAGE_NAME-bcmath $PHP_PACKAGE_NAME-pdo
+        yum -y install $PHP_PACKAGE_NAME-cli $PHP_PACKAGE_NAME-mysql  $PHP_PACKAGE_NAME-gd $PHP_PACKAGE_NAME-xml $PHP_PACKAGE_NAME-ldap $PHP_PACKAGE_NAME-mbstring $PHP_PACKAGE_NAME-bcmath $PHP_PACKAGE_NAME-pdo
 	#\cp /etc/php.ini /etc/php.ini.bak
 }
 
@@ -194,7 +187,7 @@ function setup_easypanel
 	chmod 700 $PREFIX/etc $PREFIX/var $PREFIX/nodewww/data	
 	rm -rf easypanel-$EASYPANEL_VERSION-$SYS
 	rm -rf easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz
-	EASYPANEL_URL="$DOWNLOAD_BASE_URL/easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz"
+	EASYPANEL_URL="$DOWNLOAD_BASE_URL/easypanel/easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz"
 	EA_FILE_NAME="easypanel-$EASYPANEL_VERSION-$SYS-$SYSVERSION.tar.gz"
 	wget --no-check-certificate $EASYPANEL_URL -O $EA_FILE_NAME -c
 	if [ $? != 0 ] ; then
@@ -254,7 +247,7 @@ function setup_pureftpd
 	WGET_NEW_NAME="pure-ftpd-$PUREFTP_VERSION.tar.gz"
 	wget --no-check-certificate $DOWN_URL -O $WGET_NEW_NAME -c
 	if [ $? != 0 ] ; then 
-		wget --no-check-certificate -c $K_DOWN_URL -o $WGET_NEW_NAME
+		wget --no-check-certificate $K_DOWN_URL -O $WGET_NEW_NAME -c
 		if [ $? != 0 ] ; then
 			echo $? "wget pureftp failed,please manuanl setup pureftp"
 			exit
@@ -336,14 +329,14 @@ setup_php $PHPNAME
 if [ "$ent" == "" ] ; then
 	setup_kangle
 fi
-
+#setup_easypanel $1 is php53.ini
 setup_easypanel php53
+#setup_pureftpd
 setup_webalizer
 stat_iptables
-
-setup_php54
-setup_php55
-setup_php56
+#setup_php54
+#setup_php55
+#setup_php56
 restore_config
 write_partner
 if [ ! -f /etc/php.d/ioncube.ini ] ; then
