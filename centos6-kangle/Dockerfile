@@ -5,6 +5,7 @@ EXPOSE 22
 EXPOSE 80
 EXPOSE 81
 EXPOSE 82
+EXPOSE 83
 
 RUN yum -y update; yum clean all
 RUN yum -y install wget curl curl-devel zlib-devel build-essential openssl openssl-devel openssh-server openssh passwd; yum clean all
