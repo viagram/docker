@@ -337,14 +337,13 @@ if [ "$ent" == "" ] ; then
 	setup_kangle
 fi
 
+setup_easypanel php53
+setup_webalizer
+stat_iptables
+
 setup_php54
 setup_php55
 setup_php56
-setup_easypanel php53
-#setup_pureftpd
-setup_webalizer
-stat_iptables
-setup_mysql
 restore_config
 write_partner
 if [ ! -f /etc/php.d/ioncube.ini ] ; then
