@@ -338,9 +338,9 @@ setup_webalizer
 stat_iptables
 restore_config
 write_partner
-#setup_php54
-#setup_php55
-#setup_php56
+setup_php54
+setup_php55
+setup_php56
 /vhs/kangle/bin/kangle -q
 /vhs/kangle/bin/kangle
 if [ ! -f /etc/php.d/ioncube.ini ] ; then
