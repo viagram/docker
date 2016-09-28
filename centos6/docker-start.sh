@@ -1,6 +1,6 @@
 #!/bin/bash
 
-: ${SSH_USERNAME:=user}
+: ${SSH_USERNAME:=root}
 : ${SSH_USERPASS:=$(cat /proc/sys/kernel/random/uuid | sha256sum | base64 | head -c 15;echo)}
 #: ${SSH_USERPASS:=$(dd if=/dev/urandom bs=1 count=15 | base64)}
 
@@ -23,9 +23,8 @@ __create_hostkeys() {
     fi
 }
 
-__create_user() {
+__change_pass() {
     if [ ! -f /.user_pw_set ]; then
-        useradd $SSH_USERNAME 2>/dev/null
         echo -e "$SSH_USERPASS" | (passwd --stdin $SSH_USERNAME) 2>/dev/null
         touch /.user_pw_set 2>/dev/null
         echo "========================================================================"
@@ -41,6 +40,6 @@ __create_user() {
 # Call all functions
 __create_rundir
 __create_hostkeys
-__create_user
+__change_pass
 
 exec "$@"
