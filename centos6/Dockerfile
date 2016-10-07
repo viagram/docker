@@ -1,5 +1,5 @@
 FROM centos:centos6.8
-MAINTAINER CentOS <viagram.yang@gmail.com>
+MAINTAINER CentOS 6.8 <viagram.yang@gmail.com>
 
 EXPOSE 22
 
