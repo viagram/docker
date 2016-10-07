@@ -37,9 +37,19 @@ __change_pass() {
     fi
 }
 
+__start_SSHD() {
+    if [ -f /usr/sbin/sshd ]; then
+        [ -n "`grep exit /etc/rc.local`" ] && sed -i "s/exit/#exit_the_place/g" /etc/rc.local 2>/dev/null
+        [ -z "`grep \"/usr/sbin/sshd -D\" /etc/rc.local`" ] && echo "/usr/sbin/sshd -D" >>/etc/rc.local 2>/dev/null
+        [ -n "`grep #exit_the_place /etc/rc.local`" ] && sed -i "s/#exit_the_place/exit/g" /etc/rc.local 2>/dev/null
+        /usr/sbin/sshd -D 2>/dev/null
+    fi
+}
+
 # Call all functions
 __create_rundir
 __create_hostkeys
 __change_pass
+__start_SSHD
 
 exec "$@"
