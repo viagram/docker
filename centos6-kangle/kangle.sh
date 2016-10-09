@@ -1,7 +1,7 @@
 #!/bin/bash
 
 service kangle stop
-cur_dir=`pwd`/shadowsocks-R
+cur_dir=`pwd`/Kangle
 if [ ! -d "${cur_dir}" ]; then
     mkdir -p ${cur_dir}
 fi
