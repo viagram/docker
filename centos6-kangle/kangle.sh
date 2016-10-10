@@ -16,12 +16,13 @@ find|xargs touch
 make
 make install
 if [ -f /vhs/kangle/etc/kanglestat ] ; then
+    chmod 775 /vhs/kangle/etc/kanglestat
     if [ ! -f /etc/init.d/kangle ] ; then
         \cp /vhs/kangle/etc/kanglestat /etc/init.d/kangle
     fi
     if [ ! -f /etc/rc.d/rc3.d/S66kangle ] ; then
         ln -s /etc/init.d/kangle /etc/rc.d/rc3.d/S66kangle
-            ln -s /etc/init.d/kangle /etc/rc.d/rc5.d/S66kangle
+        ln -s /etc/init.d/kangle /etc/rc.d/rc5.d/S66kangle
     fi
 fi
 service kangle start
