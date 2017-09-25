@@ -1,10 +1,5 @@
 FROM centos:centos7.4
 MAINTAINER CentOS 7.4.1708 <viagram.yang@gmail.com>
-
-LABEL name="CentOS Base Image" \
-	    vendor="CentOS7" \
-	    license="GPLv2" \
-	    build-date="20170925"
 		
 EXPOSE 22
 
