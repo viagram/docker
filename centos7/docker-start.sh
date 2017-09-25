@@ -28,11 +28,12 @@ __change_pass() {
         echo -e "$SSH_USERPASS" | (passwd --stdin $SSH_USERNAME) 2>/dev/null
         touch /.user_pw_set 2>/dev/null
         echo "========================================================================"
-        echo "You can now connect to this CentOS container via SSH using:"
+        echo -e "\t\t部署完成"
         echo ""
-        echo "and enter the '$SSH_USERNAME' password '$SSH_USERPASS' when prompted"
+        echo -e "\t用户名称:\t$SSH_USERNAME"
+        echo -e "\t用户密码:\t$SSH_USERPASS"
         echo ""
-        echo "Please remember to change the above password as soon as possible!"
+        echo -e "\t\t初次登陆后, 记得修改密码."
         echo "========================================================================"
     fi
 }
