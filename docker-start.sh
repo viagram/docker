@@ -17,8 +17,12 @@ __create_hostkeys() {
         if [ -f /etc/ssh/ssh_host_dsa_key ]; then
             rm -f /etc/ssh/ssh_host_dsa_key
         fi
-        ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
-        ssh-keygen -t rsa -f /etc/ssh/ssh_host_dsa_key -N ''
+        rm -f /etc/ssh/ssh_host_ed25519_key
+		rm -f /etc/ssh/ssh_host_ed25519_key.pub
+		(sleep 1;echo "y") | ssh-keygen -t dsa -f /etc/ssh/ssh_host_ed25519_key -N ""
+	    chmod 620 /etc/ssh/moduli
+	    chmod 644 /etc/ssh/ssh_config /etc/ssh/*.pub
+	    chmod 600 /etc/ssh/sshd_config /etc/ssh/*_key
         touch /.ssh_key_set 2>/dev/null
     fi
 }
