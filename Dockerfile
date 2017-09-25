@@ -1,4 +1,4 @@
-FROM centos:centos7.4
+FROM centos:centos7.4.1708
 MAINTAINER CentOS 7.4.1708 <viagram.yang@gmail.com>
 		
 EXPOSE 22
