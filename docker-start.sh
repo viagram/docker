@@ -5,41 +5,41 @@
 #: ${SSH_USERPASS:=$(dd if=/dev/urandom bs=1 count=15 | base64)}
 
 __create_rundir() {
-    if [ ! -d "/var/run/sshd" ]; then
-        mkdir -p /var/run/sshd
-    fi
+	if [ ! -d "/var/run/sshd" ]; then
+		mkdir -p /var/run/sshd
+	fi
 }
 __create_hostkeys() {
-    if [ ! -f /.ssh_key_set ]; then
-        if [ -f /etc/ssh/ssh_host_rsa_key ]; then
-            rm -f /etc/ssh/ssh_host_rsa_key
-        fi
-        if [ -f /etc/ssh/ssh_host_dsa_key ]; then
-            rm -f /etc/ssh/ssh_host_dsa_key
-        fi
-        rm -f /etc/ssh/ssh_host_ed25519_key
+	if [ ! -f /.ssh_key_set ]; then
+		if [ -f /etc/ssh/ssh_host_rsa_key ]; then
+			rm -f /etc/ssh/ssh_host_rsa_key
+		fi
+		if [ -f /etc/ssh/ssh_host_dsa_key ]; then
+			rm -f /etc/ssh/ssh_host_dsa_key
+		fi
+		rm -f /etc/ssh/ssh_host_ed25519_key
 		rm -f /etc/ssh/ssh_host_ed25519_key.pub
 		(sleep 1;echo "y") | ssh-keygen -t dsa -f /etc/ssh/ssh_host_ed25519_key -N ""
-	    chmod 620 /etc/ssh/moduli
-	    chmod 644 /etc/ssh/ssh_config /etc/ssh/*.pub
-	    chmod 600 /etc/ssh/sshd_config /etc/ssh/*_key
-        touch /.ssh_key_set 2>/dev/null
-    fi
+		chmod 620 /etc/ssh/moduli
+		chmod 644 /etc/ssh/ssh_config /etc/ssh/*.pub
+		chmod 600 /etc/ssh/sshd_config /etc/ssh/*_key
+		touch /.ssh_key_set 2>/dev/null
+	fi
 }
 
 __change_pass() {
-    if [ ! -f /.user_pw_set ]; then
-        echo -e "$SSH_USERPASS" | (passwd --stdin $SSH_USERNAME) 2>/dev/null
-        touch /.user_pw_set 2>/dev/null
-        echo "========================================================================"
-        echo -e "                         部署完成"
-        echo ""
-        echo -e "                  用户名称: $SSH_USERNAME"
-        echo -e "                  用户密码: $SSH_USERPASS"
-        echo ""
-        echo -e "            警告: 初次登陆后, 记得修改密码!!!"
-        echo "========================================================================"
-    fi
+	if [ ! -f /.user_pw_set ]; then
+		echo -e "$SSH_USERPASS" | (passwd --stdin $SSH_USERNAME) 2>/dev/null
+		touch /.user_pw_set 2>/dev/null
+		echo "========================================================================"
+		echo -e "						 部署完成"
+		echo 
+		echo -e "				  用户名称: $SSH_USERNAME"
+		echo -e "				  用户密码: $SSH_USERPASS"
+		echo 
+		echo -e "			警告: 初次登陆后, 记得修改密码!!!"
+		echo "========================================================================"
+	fi
 }
 
 # Call all functions
