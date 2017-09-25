@@ -28,12 +28,12 @@ __change_pass() {
         echo -e "$SSH_USERPASS" | (passwd --stdin $SSH_USERNAME) 2>/dev/null
         touch /.user_pw_set 2>/dev/null
         echo "========================================================================"
-        echo -e "\t\t部署完成"
+        echo -e "                         部署完成"
         echo ""
-        echo -e "\t用户名称:\t$SSH_USERNAME"
-        echo -e "\t用户密码:\t$SSH_USERPASS"
+        echo -e "                  用户名称: $SSH_USERNAME"
+        echo -e "                  用户密码: $SSH_USERPASS"
         echo ""
-        echo -e "\t\t初次登陆后, 记得修改密码."
+        echo -e "            警告: 初次登陆后, 记得修改密码!!!"
         echo "========================================================================"
     fi
 }
